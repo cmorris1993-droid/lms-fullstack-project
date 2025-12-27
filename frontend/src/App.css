@@ -1,42 +1,68 @@
-#root {
-  max-width: 1280px;
+:root {
+  --primary-blue: #1e293b;
+  --accent-blue: #2563eb;
+  --bg-gray: #f8fafc;
+}
+
+body {
+  background-color: var(--bg-gray);
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.lms-container {
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  padding: 50px 20px;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.lms-header h1 {
+  font-size: 3rem;
+  color: var(--primary-blue);
+  margin-bottom: 10px;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 30px;
+  margin-top: 40px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.course-card {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
 }
 
-.card {
-  padding: 2em;
+.course-badge {
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 15px;
 }
 
-.read-the-docs {
-  color: #888;
+.course-card h2 {
+  margin: 10px 0;
+  color: var(--primary-blue);
+}
+
+.view-button {
+  margin-top: 25px;
+  background-color: #f1f5f9;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-button:hover {
+  background-color: #e2e8f0;
+  transform: translateY(-2px);
 }
