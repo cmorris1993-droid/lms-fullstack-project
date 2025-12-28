@@ -25,3 +25,4 @@ class EnrollmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Enrollment
         fields = ['id', 'student', 'course', 'course_details', 'enrolled_at']
+        read_only_fields = ['student']

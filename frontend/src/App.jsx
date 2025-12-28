@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Login from './components/Login';
 import AdminDashboard from './components/AdminDashboard';
+import TeacherDashboard from './components/TeacherDashboard';
+import StudentDashboard from './components/StudentDashboard';
 
 const App = () => {
     const [user, setUser] = useState(null);
@@ -84,15 +86,9 @@ const App = () => {
                 {user.is_superuser ? (
                     <AdminDashboard token={token} />
                 ) : user.is_staff ? (
-                    <div style={{ padding: '20px' }}>
-                        <h1>Teacher Dashboard</h1>
-                        <p>Welcome to the instructor portal.</p>
-                    </div>
+                    <TeacherDashboard token={token} />
                 ) : (
-                    <div style={{ padding: '20px' }}>
-                        <h1>Student Dashboard</h1>
-                        <p>Welcome to your learning area.</p>
-                    </div>
+                    <StudentDashboard token={token} />
                 )}
             </main>
         </div>

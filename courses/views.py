@@ -18,26 +18,39 @@ class UserProfileView(generics.RetrieveAPIView):
 class CourseListCreate(generics.ListCreateAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Course.objects.all()
 
 class CourseDelete(generics.DestroyAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+    permission_classes = [permissions.IsAdminUser]
 
 class LessonListCreate(generics.ListCreateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 class LessonDelete(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
-    serializer_class = LessonSerializer    
+    serializer_class = LessonSerializer 
+    permission_classes = [permissions.IsAuthenticated]   
 
 class EnrollmentCreate(generics.ListCreateAPIView):
-    queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Enrollment.objects.filter(student=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(student=self.request.user)
 
 class StudentEnrollmentList(generics.ListAPIView):
     serializer_class = EnrollmentSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        student_id = self.kwargs['student_id']
-        return Enrollment.objects.filter(student_id=student_id)
+        return Enrollment.objects.filter(student=self.request.user)
