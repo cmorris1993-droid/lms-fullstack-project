@@ -4,6 +4,7 @@ import './App.css'
 
 function App() {
   const [courses, setCourses] = useState([])
+  const [enrolledCourses, setEnrolledCourses] = useState([])
   const [user, setUser] = useState({ id: 2, username: 'TestStudent', isStaff: false }); 
   const [newCourseTitle, setNewCourseTitle] = useState('')
   const [newCourseDescription, setNewCourseDescription] = useState('')
@@ -13,11 +14,22 @@ function App() {
 
   useEffect(() => {
     fetchCourses()
-  }, [])
+    if (!user.isStaff) {
+      fetchEnrolledCourses()
+    }
+  }, [user.id, user.isStaff])
 
   const fetchCourses = () => {
     axios.get('http://127.0.0.1:8000/api/courses/')
       .then(res => setCourses(res.data))
+      .catch(err => console.log(err))
+  }
+
+  const fetchEnrolledCourses = () => {
+    axios.get(`http://127.0.0.1:8000/api/student/${user.id}/enrollments/`)
+      .then(res => {
+        setEnrolledCourses(res.data.map(enrollment => enrollment.course_details))
+      })
       .catch(err => console.log(err))
   }
 
@@ -40,6 +52,7 @@ function App() {
       axios.delete(`http://127.0.0.1:8000/api/courses/${id}/`)
         .then(() => {
           fetchCourses()
+          if (!user.isStaff) fetchEnrolledCourses();
         })
         .catch(err => console.log(err))
     }
@@ -68,6 +81,7 @@ function App() {
     })
     .then(() => {
       alert("Successfully enrolled!");
+      fetchEnrolledCourses();
     })
     .catch(err => {
       console.error(err);
@@ -108,42 +122,61 @@ function App() {
         </section>
       )}
 
-      <hr />
-
-      <div className="course-grid">
-        {courses.length > 0 ? (
-          courses.map(course => (
-            <div key={course.id} className="course-card">
-              <div className="course-badge">Course</div>
-              <h2>{course.title}</h2>
-              <p className="course-description">{course.description}</p>
-              <div className="card-actions">
+      {!user.isStaff && enrolledCourses.length > 0 && (
+        <section className="enrolled-section">
+          <h2>My Learning</h2>
+          <div className="course-grid">
+            {enrolledCourses.map(course => (
+              <div key={course.id} className="course-card enrolled-card">
+                <div className="course-badge">Enrolled</div>
+                <h2>{course.title}</h2>
                 <button 
                   className="view-button" 
                   onClick={() => setSelectedCourse(course)}
                 >
-                  View Content
+                  Continue Learning
                 </button>
-                
-                {user.isStaff && (
-                  <button 
-                    className="delete-button" 
-                    onClick={() => deleteCourse(course.id)}>
-                    Delete
-                  </button>
-                )}
-
-                {!user.isStaff && (
-                  <button 
-                    className="enroll-button"
-                    onClick={() => enrollCourse(course.id)}
-                  >
-                    Enroll Now
-                  </button>
-                )}
               </div>
-            </div>
-          ))
+            ))}
+          </div>
+          <hr />
+        </section>
+      )}
+
+      <h2>Course Catalog</h2>
+      <div className="course-grid">
+        {courses.length > 0 ? (
+          courses.map(course => {
+            const isEnrolled = enrolledCourses.some(e => e.id === course.id);
+            return (
+              <div key={course.id} className="course-card">
+                <div className="course-badge">Course</div>
+                <h2>{course.title}</h2>
+                <p className="course-description">{course.description}</p>
+                <div className="card-actions">
+                  <button className="view-button" onClick={() => setSelectedCourse(course)}>
+                    View Content
+                  </button>
+                  
+                  {user.isStaff && (
+                    <button className="delete-button" onClick={() => deleteCourse(course.id)}>
+                      Delete
+                    </button>
+                  )}
+
+                  {!user.isStaff && (
+                    <button 
+                      className={isEnrolled ? "enrolled-btn-disabled" : "enroll-button"}
+                      onClick={() => !isEnrolled && enrollCourse(course.id)}
+                      disabled={isEnrolled}
+                    >
+                      {isEnrolled ? "Already Enrolled" : "Enroll Now"}
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })
         ) : (
           <div className="no-data-container">
             <p className="no-data">No courses available. Please check back later!</p>

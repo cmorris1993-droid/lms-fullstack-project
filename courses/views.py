@@ -21,3 +21,10 @@ class LessonDelete(generics.DestroyAPIView):
 class EnrollmentCreate(generics.ListCreateAPIView):
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
+
+class StudentEnrollmentList(generics.ListAPIView):
+    serializer_class = EnrollmentSerializer
+
+    def get_queryset(self):
+        student_id = self.kwargs['student_id']
+        return Enrollment.objects.filter(student_id=student_id)

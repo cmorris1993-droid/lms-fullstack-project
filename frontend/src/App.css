@@ -187,6 +187,27 @@ hr {
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
+.enrolled-btn-disabled {
+  flex: 1;
+  margin-top: 25px;
+  background-color: #e2e8f0;
+  color: #94a3b8;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: not-allowed;
+}
+
+.enrolled-section h2 {
+  color: var(--primary-blue);
+  margin-bottom: 20px;
+}
+
+.enrolled-card {
+  border-left: 5px solid var(--accent-blue);
+}
+
 .add-lesson-form {
   margin-bottom: 30px;
   background: #f1f5f9;

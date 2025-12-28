@@ -14,6 +14,8 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'lessons']
 
 class EnrollmentSerializer(serializers.ModelSerializer):
+    course_details = CourseSerializer(source='course', read_only=True)
+
     class Meta:
         model = Enrollment
-        fields = ['id', 'student', 'course', 'enrolled_at']
+        fields = ['id', 'student', 'course', 'course_details', 'enrolled_at']
