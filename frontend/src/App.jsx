@@ -6,6 +6,9 @@ function App() {
   const [courses, setCourses] = useState([])
   const [newCourseTitle, setNewCourseTitle] = useState('')
   const [newCourseDescription, setNewCourseDescription] = useState('')
+  const [selectedCourse, setSelectedCourse] = useState(null)
+  const [newLessonTitle, setNewLessonTitle] = useState('')
+  const [newLessonContent, setNewLessonContent] = useState('')
 
   useEffect(() => {
     fetchCourses()
@@ -39,6 +42,22 @@ function App() {
         })
         .catch(err => console.log(err))
     }
+  }
+
+  const addLesson = (e) => {
+    e.preventDefault();
+    axios.post('http://127.0.0.1:8000/api/lessons/', {
+      course: selectedCourse.id,
+      title: newLessonTitle,
+      content: newLessonContent
+    })
+    .then(() => {
+      fetchCourses();
+      setNewLessonTitle('');
+      setNewLessonContent('');
+      setSelectedCourse(null);
+    })
+    .catch(err => console.error(err));
   }
 
   return (
@@ -81,7 +100,12 @@ function App() {
             <h2>{course.title}</h2>
             <p className="course-description">{course.description}</p>
             <div className="card-actions">
-              <button className="view-button">View Content</button>
+              <button 
+                className="view-button" 
+                onClick={() => setSelectedCourse(course)}
+              >
+                View Content
+              </button>
               <button 
                 className="delete-button" 
                 onClick={() => deleteCourse(course.id)}>
@@ -91,6 +115,50 @@ function App() {
           </div>
         ))}
       </div>
+
+      {selectedCourse && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>{selectedCourse.title} - Lessons</h2>
+              <button className="close-btn" onClick={() => setSelectedCourse(null)}>×</button>
+            </div>
+            
+            <form onSubmit={addLesson} className="add-lesson-form">
+              <h3>Add New Lesson</h3>
+              <input 
+                type="text" 
+                placeholder="Lesson Title" 
+                value={newLessonTitle}
+                onChange={(e) => setNewLessonTitle(e.target.value)}
+                required 
+              />
+              <textarea 
+                placeholder="Lesson Content" 
+                value={newLessonContent}
+                onChange={(e) => setNewLessonContent(e.target.value)}
+                required
+              />
+              <button type="submit" className="create-button">Add Lesson</button>
+            </form>
+
+            <hr />
+
+            <div className="lesson-container">
+              {selectedCourse.lessons && selectedCourse.lessons.length > 0 ? (
+                selectedCourse.lessons.map(lesson => (
+                  <div key={lesson.id} className="lesson-card">
+                    <h3>{lesson.title}</h3>
+                    <p>{lesson.content}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="no-data">No lessons added for this course yet.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

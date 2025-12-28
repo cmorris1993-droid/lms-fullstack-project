@@ -1,7 +1,15 @@
-from rest_framework import viewsets
-from .models import Course
-from .serializers import CourseSerializer
+from rest_framework import generics
+from .models import Course, Lesson
+from .serializers import CourseSerializer, LessonSerializer
 
-class CourseViewSet(viewsets.ModelViewSet):
+class CourseListCreate(generics.ListCreateAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+
+class CourseDelete(generics.DestroyAPIView):
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+
+class LessonListCreate(generics.ListCreateAPIView):
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
