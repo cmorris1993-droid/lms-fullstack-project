@@ -22,6 +22,80 @@ body {
   margin-bottom: 10px;
 }
 
+.admin-section {
+  max-width: 800px;
+  margin: 0 auto 50px auto;
+}
+
+.add-course-form {
+  background: white;
+  padding: 35px;
+  border-radius: 15px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.add-course-form h2 {
+  color: var(--primary-blue);
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-size: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group input, 
+.form-group textarea {
+  width: 100%;
+  padding: 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: all 0.2s;
+}
+
+.form-group input:focus, 
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.form-group textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.create-button {
+  width: 100%;
+  background-color: var(--accent-blue);
+  color: white;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.create-button:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+hr {
+  border: 0;
+  height: 1px;
+  background: #e2e8f0;
+  margin: 50px 0;
+}
+
 .course-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -35,6 +109,8 @@ body {
   border-radius: 15px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
 }
 
 .course-badge {
@@ -51,7 +127,14 @@ body {
   color: var(--primary-blue);
 }
 
+.card-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 10px;
+}
+
 .view-button {
+  flex: 2;
   margin-top: 25px;
   background-color: #f1f5f9;
   border: none;
@@ -67,29 +150,20 @@ body {
   transform: translateY(-2px);
 }
 
-.card-actions {
-  margin-top: auto;
-  display: flex;
-  gap: 10px;
-}
-
 .delete-button {
-  margin-top: 15px;
+  flex: 1;
+  margin-top: 25px;
   background-color: #fee2e2;
   color: #dc2626;
   border: 1px solid #fecaca;
-  padding: 10px;
+  padding: 12px;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  flex: 1;
+  transition: all 0.2s;
 }
 
 .delete-button:hover {
   background-color: #fca5a5;
   color: white;
-}
-
-.view-button {
-  flex: 2;
 }
