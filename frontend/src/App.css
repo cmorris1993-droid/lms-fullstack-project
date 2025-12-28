@@ -66,3 +66,30 @@ body {
   background-color: #e2e8f0;
   transform: translateY(-2px);
 }
+
+.card-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 10px;
+}
+
+.delete-button {
+  margin-top: 15px;
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+}
+
+.delete-button:hover {
+  background-color: #fca5a5;
+  color: white;
+}
+
+.view-button {
+  flex: 2;
+}
