@@ -4,6 +4,7 @@ import './App.css'
 
 function App() {
   const [courses, setCourses] = useState([])
+  const [user, setUser] = useState({ id: 2, username: 'TestStudent', isStaff: false }); 
   const [newCourseTitle, setNewCourseTitle] = useState('')
   const [newCourseDescription, setNewCourseDescription] = useState('')
   const [selectedCourse, setSelectedCourse] = useState(null)
@@ -60,60 +61,94 @@ function App() {
     .catch(err => console.error(err));
   }
 
+  const enrollCourse = (courseId) => {
+    axios.post('http://127.0.0.1:8000/api/enrollments/', {
+      student: user.id,
+      course: courseId
+    })
+    .then(() => {
+      alert("Successfully enrolled!");
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Enrollment failed or you are already enrolled.");
+    });
+  }
+
   return (
     <div className="lms-container">
       <header className="lms-header">
         <h1>Learning Management System</h1>
-        <p>Welcome back, Instructor!</p>
+        <p>Welcome back, {user.isStaff ? 'Instructor' : 'Student'} {user.username}!</p>
       </header>
 
-      <section className="admin-section">
-        <form onSubmit={addCourse} className="add-course-form">
-          <h2>Create New Course</h2>
-          <div className="form-group">
-            <input 
-              type="text" 
-              placeholder="Course Title" 
-              value={newCourseTitle}
-              onChange={(e) => setNewCourseTitle(e.target.value)}
-              required 
-            />
-          </div>
-          <div className="form-group">
-            <textarea 
-              placeholder="Course Description" 
-              value={newCourseDescription}
-              onChange={(e) => setNewCourseDescription(e.target.value)}
-              required
-            />
-          </div>
-          <button type="submit" className="create-button">Add Course to LMS</button>
-        </form>
-      </section>
+      {user.isStaff && (
+        <section className="admin-section">
+          <form onSubmit={addCourse} className="add-course-form">
+            <h2>Create New Course</h2>
+            <div className="form-group">
+              <input 
+                type="text" 
+                placeholder="Course Title" 
+                value={newCourseTitle}
+                onChange={(e) => setNewCourseTitle(e.target.value)}
+                required 
+              />
+            </div>
+            <div className="form-group">
+              <textarea 
+                placeholder="Course Description" 
+                value={newCourseDescription}
+                onChange={(e) => setNewCourseDescription(e.target.value)}
+                required
+              />
+            </div>
+            <button type="submit" className="create-button">Add Course to LMS</button>
+          </form>
+        </section>
+      )}
 
       <hr />
 
       <div className="course-grid">
-        {courses.map(course => (
-          <div key={course.id} className="course-card">
-            <div className="course-badge">Course</div>
-            <h2>{course.title}</h2>
-            <p className="course-description">{course.description}</p>
-            <div className="card-actions">
-              <button 
-                className="view-button" 
-                onClick={() => setSelectedCourse(course)}
-              >
-                View Content
-              </button>
-              <button 
-                className="delete-button" 
-                onClick={() => deleteCourse(course.id)}>
-                Delete
-              </button>
+        {courses.length > 0 ? (
+          courses.map(course => (
+            <div key={course.id} className="course-card">
+              <div className="course-badge">Course</div>
+              <h2>{course.title}</h2>
+              <p className="course-description">{course.description}</p>
+              <div className="card-actions">
+                <button 
+                  className="view-button" 
+                  onClick={() => setSelectedCourse(course)}
+                >
+                  View Content
+                </button>
+                
+                {user.isStaff && (
+                  <button 
+                    className="delete-button" 
+                    onClick={() => deleteCourse(course.id)}>
+                    Delete
+                  </button>
+                )}
+
+                {!user.isStaff && (
+                  <button 
+                    className="enroll-button"
+                    onClick={() => enrollCourse(course.id)}
+                  >
+                    Enroll Now
+                  </button>
+                )}
+              </div>
             </div>
+          ))
+        ) : (
+          <div className="no-data-container">
+            <p className="no-data">No courses available. Please check back later!</p>
           </div>
-        ))}
+        )}
       </div>
 
       {selectedCourse && (
@@ -124,23 +159,25 @@ function App() {
               <button className="close-btn" onClick={() => setSelectedCourse(null)}>×</button>
             </div>
             
-            <form onSubmit={addLesson} className="add-lesson-form">
-              <h3>Add New Lesson</h3>
-              <input 
-                type="text" 
-                placeholder="Lesson Title" 
-                value={newLessonTitle}
-                onChange={(e) => setNewLessonTitle(e.target.value)}
-                required 
-              />
-              <textarea 
-                placeholder="Lesson Content" 
-                value={newLessonContent}
-                onChange={(e) => setNewLessonContent(e.target.value)}
-                required
-              />
-              <button type="submit" className="create-button">Add Lesson</button>
-            </form>
+            {user.isStaff && (
+              <form onSubmit={addLesson} className="add-lesson-form">
+                <h3>Add New Lesson</h3>
+                <input 
+                  type="text" 
+                  placeholder="Lesson Title" 
+                  value={newLessonTitle}
+                  onChange={(e) => setNewLessonTitle(e.target.value)}
+                  required 
+                />
+                <textarea 
+                  placeholder="Lesson Content" 
+                  value={newLessonContent}
+                  onChange={(e) => setNewLessonContent(e.target.value)}
+                  required
+                />
+                <button type="submit" className="create-button">Add Lesson</button>
+              </form>
+            )}
 
             <hr />
 

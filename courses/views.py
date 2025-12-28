@@ -1,6 +1,6 @@
 from rest_framework import generics
-from .models import Course, Lesson
-from .serializers import CourseSerializer, LessonSerializer
+from .models import Course, Lesson, Enrollment
+from .serializers import CourseSerializer, LessonSerializer, EnrollmentSerializer
 
 class CourseListCreate(generics.ListCreateAPIView):
     queryset = Course.objects.all()
@@ -13,3 +13,11 @@ class CourseDelete(generics.DestroyAPIView):
 class LessonListCreate(generics.ListCreateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+
+class LessonDelete(generics.DestroyAPIView):
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer    
+
+class EnrollmentCreate(generics.ListCreateAPIView):
+    queryset = Enrollment.objects.all()
+    serializer_class = EnrollmentSerializer
