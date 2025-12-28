@@ -1,6 +1,19 @@
-from rest_framework import generics
+from rest_framework import generics, permissions
+from django.contrib.auth.models import User
 from .models import Course, Lesson, Enrollment
-from .serializers import CourseSerializer, LessonSerializer, EnrollmentSerializer
+from .serializers import CourseSerializer, LessonSerializer, EnrollmentSerializer, UserSerializer
+
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+class UserProfileView(generics.RetrieveAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
 
 class CourseListCreate(generics.ListCreateAPIView):
     queryset = Course.objects.all()
