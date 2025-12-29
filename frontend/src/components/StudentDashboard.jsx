@@ -9,21 +9,22 @@ const StudentDashboard = ({ token, user }) => {
     const [selectedCourse, setSelectedCourse] = useState(null);
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        if (token) {
+            fetchData();
+        }
+    }, [token]);
 
     const fetchData = async () => {
         try {
             const coursesRes = await axios.get('http://127.0.0.1:8000/courses/', {
                 headers: { Authorization: `Token ${token}` }
             });
-            setAllCourses(coursesRes.data);
+            setAllCourses(Array.isArray(coursesRes.data) ? coursesRes.data : []);
 
             const enrollmentsRes = await axios.get('http://127.0.0.1:8000/enrolled-courses/', {
                 headers: { Authorization: `Token ${token}` }
             });
-            setMyEnrollments(enrollmentsRes.data);
-            
+            setMyEnrollments(Array.isArray(enrollmentsRes.data) ? enrollmentsRes.data : []);
             setLoading(false);
         } catch (err) {
             console.error("Error fetching student data:", err);
@@ -38,32 +39,29 @@ const StudentDashboard = ({ token, user }) => {
             }, {
                 headers: { Authorization: `Token ${token}` }
             });
-            alert("Enrolled successfully!");
             fetchData();
         } catch (err) {
             console.error("Enrollment error:", err.response?.data);
-            alert("Enrollment failed. See console for details.");
         }
     };
 
     const containerStyle = { padding: '40px', fontFamily: 'Segoe UI, sans-serif' };
-    const sectionStyle = { marginBottom: '40px' };
-    const cardGrid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' };
+    const sectionStyle = { marginBottom: '50px' };
+    const headerStyle = { borderBottom: '2px solid #eee', paddingBottom: '10px', marginBottom: '25px', color: '#1a1f36' };
+    const cardGrid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '25px' };
     const cardStyle = { 
         backgroundColor: 'white', 
-        padding: '20px', 
+        padding: '25px', 
         borderRadius: '8px', 
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)' 
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        borderTop: '5px solid #1a73e8'
     };
-    const btnStyle = {
-        marginTop: '15px',
-        padding: '10px 15px',
-        color: 'white',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer',
-        fontWeight: 'bold'
-    };
+    const enrollmentCardStyle = { ...cardStyle, borderTop: '5px solid #34a853' };
+    const primaryBtn = { padding: '12px 20px', backgroundColor: '#1a73e8', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', width: '100%' };
+    const successBtn = { ...primaryBtn, backgroundColor: '#34a853' };
 
     if (loading) return <div style={containerStyle}>Loading your learning portal...</div>;
 
@@ -76,25 +74,32 @@ const StudentDashboard = ({ token, user }) => {
         );
     }
 
-    const enrolledCourseIds = myEnrollments.map(e => e.course);
+    const enrolledCourseIds = myEnrollments.map(e => e.course || null);
     const availableCourses = allCourses.filter(c => !enrolledCourseIds.includes(c.id));
 
     return (
         <div style={containerStyle}>
-            <h1>Student Learning Portal</h1>
+            <h1 style={{ fontSize: '2.5rem', marginBottom: '10px' }}>Student Learning Portal</h1>
+            <p style={{ color: '#5f6368', marginBottom: '40px' }}>Welcome back, {user?.username || 'Student'}.</p>
 
             <div style={sectionStyle}>
-                <h2>My Courses</h2>
+                <h2 style={headerStyle}>My Active Courses</h2>
                 {myEnrollments.length === 0 ? (
-                    <p>You haven't enrolled in any courses yet.</p>
+                    <p style={{ color: '#70757a' }}>You haven't enrolled in any courses yet.</p>
                 ) : (
                     <div style={cardGrid}>
                         {myEnrollments.map(enrollment => (
-                            <div key={enrollment.id} style={cardStyle}>
-                                <h3 style={{ color: '#1a73e8' }}>{enrollment.course_details?.title}</h3>
-                                <p>{enrollment.course_details?.description}</p>
+                            <div key={enrollment.id} style={enrollmentCardStyle}>
+                                <div>
+                                    <h3 style={{ color: '#1a73e8', marginTop: 0 }}>
+                                        {enrollment.course_details?.title || "Untitled Course"}
+                                    </h3>
+                                    <p style={{ color: '#4f566b' }}>
+                                        {enrollment.course_details?.description || "No description available."}
+                                    </p>
+                                </div>
                                 <button 
-                                    style={{ ...btnStyle, backgroundColor: '#34a853' }}
+                                    style={successBtn}
                                     onClick={() => setSelectedCourse(enrollment.course_details)}
                                 >
                                     Go to Lessons
@@ -106,17 +111,19 @@ const StudentDashboard = ({ token, user }) => {
             </div>
 
             <div style={sectionStyle}>
-                <h2>Available Courses</h2>
+                <h2 style={headerStyle}>Available for Enrollment</h2>
                 {availableCourses.length === 0 ? (
-                    <p>No new courses available at the moment.</p>
+                    <p style={{ color: '#70757a' }}>No new courses available.</p>
                 ) : (
                     <div style={cardGrid}>
                         {availableCourses.map(course => (
                             <div key={course.id} style={cardStyle}>
-                                <h3 style={{ color: '#1a1f36' }}>{course.title}</h3>
-                                <p>{course.description}</p>
+                                <div>
+                                    <h3 style={{ color: '#1a1f36', marginTop: 0 }}>{course?.title}</h3>
+                                    <p style={{ color: '#4f566b' }}>{course?.description}</p>
+                                </div>
                                 <button 
-                                    style={{ ...btnStyle, backgroundColor: '#1a73e8' }} 
+                                    style={primaryBtn} 
                                     onClick={() => handleEnroll(course.id)}
                                 >
                                     Enroll Now

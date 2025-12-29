@@ -1,4 +1,4 @@
-from rest_framework import generics, permissions
+from rest_framework import viewsets, generics, permissions
 from django.contrib.auth.models import User
 from .models import Course, Lesson, Enrollment
 from .serializers import CourseSerializer, LessonSerializer, EnrollmentSerializer, UserSerializer
@@ -15,30 +15,17 @@ class UserProfileView(generics.RetrieveAPIView):
     def get_object(self):
         return self.request.user
 
-class CourseListCreate(generics.ListCreateAPIView):
+class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        return Course.objects.all()
-
-class CourseDelete(generics.DestroyAPIView):
-    queryset = Course.objects.all()
-    serializer_class = CourseSerializer
-    permission_classes = [permissions.IsAdminUser]
-
-class LessonListCreate(generics.ListCreateAPIView):
+class LessonViewSet(viewsets.ModelViewSet):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-class LessonDelete(generics.DestroyAPIView):
-    queryset = Lesson.objects.all()
-    serializer_class = LessonSerializer 
-    permission_classes = [permissions.IsAuthenticated]   
-
-class EnrollmentCreate(generics.ListCreateAPIView):
+class EnrollmentViewSet(viewsets.ModelViewSet):
     serializer_class = EnrollmentSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -47,10 +34,3 @@ class EnrollmentCreate(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(student=self.request.user)
-
-class StudentEnrollmentList(generics.ListAPIView):
-    serializer_class = EnrollmentSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        return Enrollment.objects.filter(student=self.request.user)

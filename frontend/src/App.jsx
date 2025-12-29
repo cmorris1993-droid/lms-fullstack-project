@@ -86,9 +86,9 @@ const App = () => {
                 {user.is_superuser ? (
                     <AdminDashboard token={token} />
                 ) : user.is_staff ? (
-                    <TeacherDashboard token={token} />
+                    <TeacherDashboard token={token} user={user} />
                 ) : (
-                    <StudentDashboard token={token} />
+                    <StudentDashboard token={token} user={user} />
                 )}
             </main>
         </div>

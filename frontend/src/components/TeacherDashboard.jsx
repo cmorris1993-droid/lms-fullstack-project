@@ -1,64 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const TeacherDashboard = ({ token }) => {
+const TeacherDashboard = ({ token, user }) => {
     const [courses, setCourses] = useState([]);
+    const [newCourse, setNewCourse] = useState({ title: '', description: '' });
     const [selectedCourse, setSelectedCourse] = useState(null);
-    const [lessons, setLessons] = useState([]);
-    const [showForm, setShowForm] = useState(false);
-    const [showLessonForm, setShowLessonForm] = useState(false);
-    
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [lessonTitle, setLessonTitle] = useState('');
-    const [lessonContent, setLessonContent] = useState('');
+    const [newLesson, setNewLesson] = useState({ title: '', content: '' });
+    const [loading, setLoading] = useState(true);
+    const [editingCourse, setEditingCourse] = useState(null);
+    const [editingLesson, setEditingLesson] = useState(null);
 
     useEffect(() => {
         fetchCourses();
     }, []);
 
-    useEffect(() => {
-        if (selectedCourse) {
-            fetchLessons(selectedCourse.id);
-        }
-    }, [selectedCourse]);
-
     const fetchCourses = async () => {
         try {
-            const response = await axios.get('http://127.0.0.1:8000/courses/', {
+            const res = await axios.get('http://127.0.0.1:8000/courses/', {
                 headers: { Authorization: `Token ${token}` }
             });
-            setCourses(response.data);
+            setCourses(res.data);
+            setLoading(false);
         } catch (err) {
-            console.error("Error fetching courses", err);
-        }
-    };
-
-    const fetchLessons = async (courseId) => {
-        try {
-            const response = await axios.get('http://127.0.0.1:8000/lessons/', {
-                headers: { Authorization: `Token ${token}` }
-            });
-            const filtered = response.data.filter(lesson => lesson.course === courseId);
-            setLessons(filtered);
-        } catch (err) {
-            console.error("Error fetching lessons", err);
+            console.error(err);
+            setLoading(false);
         }
     };
 
     const handleCreateCourse = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://127.0.0.1:8000/courses/', 
-                { title, description },
-                { headers: { Authorization: `Token ${token}` } }
-            );
-            setTitle('');
-            setDescription('');
-            setShowForm(false);
-            fetchCourses(); 
+            await axios.post('http://127.0.0.1:8000/courses/', newCourse, {
+                headers: { Authorization: `Token ${token}` }
+            });
+            setNewCourse({ title: '', description: '' });
+            fetchCourses();
         } catch (err) {
-            console.error("Error creating course", err);
+            console.error(err);
+        }
+    };
+
+    const handleUpdateCourse = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.put(`http://127.0.0.1:8000/courses/${editingCourse.id}/`, editingCourse, {
+                headers: { Authorization: `Token ${token}` }
+            });
+            setEditingCourse(null);
+            fetchCourses();
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleDeleteCourse = async (courseId) => {
+        if (!window.confirm("Are you sure? This removes all lessons and enrollments.")) return;
+        try {
+            await axios.delete(`http://127.0.0.1:8000/courses/${courseId}/`, {
+                headers: { Authorization: `Token ${token}` }
+            });
+            fetchCourses();
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -67,187 +70,120 @@ const TeacherDashboard = ({ token }) => {
         try {
             await axios.post('http://127.0.0.1:8000/lessons/', {
                 course: selectedCourse.id,
-                title: lessonTitle,
-                content: lessonContent
+                ...newLesson
             }, {
                 headers: { Authorization: `Token ${token}` }
             });
-            setLessonTitle('');
-            setLessonContent('');
-            setShowLessonForm(false);
-            fetchLessons(selectedCourse.id);
+            setNewLesson({ title: '', content: '' });
+            refreshSelectedCourse();
         } catch (err) {
-            console.error("Error adding lesson", err);
+            console.error(err);
         }
     };
 
-    const deleteCourse = async (courseId) => {
-        if (window.confirm("Are you sure you want to delete this course?")) {
-            try {
-                await axios.delete(`http://127.0.0.1:8000/courses/${courseId}/`, {
-                    headers: { Authorization: `Token ${token}` }
-                });
-                setCourses(courses.filter(course => course.id !== courseId));
-            } catch (err) {
-                console.error("Error deleting course", err);
-            }
+    const handleUpdateLesson = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.put(`http://127.0.0.1:8000/lessons/${editingLesson.id}/`, {
+                ...editingLesson,
+                course: selectedCourse.id
+            }, {
+                headers: { Authorization: `Token ${token}` }
+            });
+            setEditingLesson(null);
+            refreshSelectedCourse();
+        } catch (err) {
+            console.error(err);
         }
     };
 
-    const deleteLesson = async (lessonId) => {
-        if (window.confirm("Are you sure you want to delete this lesson?")) {
-            try {
-                await axios.delete(`http://127.0.0.1:8000/lessons/${lessonId}/`, {
-                    headers: { Authorization: `Token ${token}` }
-                });
-                setLessons(lessons.filter(lesson => lesson.id !== lessonId));
-            } catch (err) {
-                console.error("Error deleting lesson", err);
-            }
+    const handleDeleteLesson = async (lessonId) => {
+        if (!window.confirm("Delete this lesson?")) return;
+        try {
+            await axios.delete(`http://127.0.0.1:8000/lessons/${lessonId}/`, {
+                headers: { Authorization: `Token ${token}` }
+            });
+            refreshSelectedCourse();
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const refreshSelectedCourse = async () => {
+        const updated = await axios.get('http://127.0.0.1:8000/courses/', {
+            headers: { Authorization: `Token ${token}` }
+        });
+        setCourses(updated.data);
+        if (selectedCourse) {
+            const refreshed = updated.data.find(c => c.id === selectedCourse.id);
+            setSelectedCourse(refreshed);
         }
     };
 
     const containerStyle = { padding: '40px', fontFamily: 'Segoe UI, sans-serif' };
-    const cardStyle = { 
-        backgroundColor: 'white', 
-        padding: '20px', 
-        borderRadius: '8px', 
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        marginBottom: '20px'
-    };
-    const buttonStyle = {
-        padding: '10px 20px',
-        backgroundColor: '#1a73e8',
-        color: 'white',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer',
-        fontWeight: 'bold',
-        marginRight: '10px'
-    };
-    const inputStyle = {
-        width: '100%',
-        padding: '10px',
-        margin: '10px 0',
-        borderRadius: '4px',
-        border: '1px solid #ddd',
-        boxSizing: 'border-box'
-    };
+    const formCardStyle = { backgroundColor: '#f8f9fa', padding: '30px', borderRadius: '12px', marginBottom: '40px' };
+    const cardGrid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '25px' };
+    const cardStyle = { backgroundColor: 'white', padding: '25px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderTop: '5px solid #1a73e8' };
+    const inputStyle = { display: 'block', width: '100%', padding: '12px', marginBottom: '10px', borderRadius: '6px', border: '1px solid #ddd', boxSizing: 'border-box' };
+    const primaryBtn = { padding: '10px 20px', backgroundColor: '#1a73e8', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' };
+    const deleteBtn = { padding: '8px 16px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' };
+    const editBtn = { padding: '8px 16px', backgroundColor: '#f39c12', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' };
+
+    if (loading) return <div style={containerStyle}>Loading...</div>;
 
     if (selectedCourse) {
         return (
             <div style={containerStyle}>
-                <button 
-                    style={{ ...buttonStyle, backgroundColor: '#5f6368', marginBottom: '20px' }} 
-                    onClick={() => setSelectedCourse(null)}
-                >
-                    ← Back to Courses
-                </button>
-                <div style={cardStyle}>
-                    <h1 style={{ color: '#1a1f36' }}>{selectedCourse.title}</h1>
-                    <p style={{ color: '#5f6368' }}>{selectedCourse.description}</p>
-                </div>
-                
-                <div style={{ ...cardStyle, borderLeft: '5px solid #1a73e8' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <h3>Course Lessons</h3>
-                        <button style={buttonStyle} onClick={() => setShowLessonForm(!showLessonForm)}>
-                            {showLessonForm ? 'Cancel' : '+ Add New Lesson'}
-                        </button>
-                    </div>
+                <button style={{...primaryBtn, backgroundColor: '#6c757d', marginBottom: '20px'}} onClick={() => setSelectedCourse(null)}>← Back</button>
+                <h1>{selectedCourse.title}</h1>
 
-                    {showLessonForm && (
-                        <form onSubmit={handleAddLesson} style={{ marginTop: '20px', padding: '15px', background: '#f8f9fa', borderRadius: '6px' }}>
-                            <input 
-                                placeholder="Lesson Title" 
-                                style={inputStyle} 
-                                value={lessonTitle}
-                                onChange={(e) => setLessonTitle(e.target.value)}
-                                required 
-                            />
-                            <textarea 
-                                placeholder="Lesson Content" 
-                                style={{ ...inputStyle, height: '100px' }} 
-                                value={lessonContent}
-                                onChange={(e) => setLessonContent(e.target.value)}
-                                required 
-                            />
-                            <button type="submit" style={buttonStyle}>Save Lesson</button>
-                        </form>
-                    )}
-
-                    <div style={{ marginTop: '20px' }}>
-                        {lessons.length === 0 ? (
-                            <p style={{ color: '#9aa0a6' }}>No lessons added yet.</p>
-                        ) : (
-                            lessons.map(lesson => (
-                                <div key={lesson.id} style={{ padding: '15px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div>
-                                        <h4 style={{ margin: '0 0 5px 0', color: '#1a1f36' }}>{lesson.title}</h4>
-                                        <p style={{ margin: 0, fontSize: '14px', color: '#5f6368' }}>{lesson.content}</p>
-                                    </div>
-                                    <button 
-                                        onClick={() => deleteLesson(lesson.id)}
-                                        style={{ background: 'none', border: 'none', color: '#d93025', cursor: 'pointer', fontSize: '13px' }}
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            ))
-                        )}
-                    </div>
+                <div style={formCardStyle}>
+                    <h3>{editingLesson ? "Edit Lesson" : "Add New Lesson"}</h3>
+                    <form onSubmit={editingLesson ? handleUpdateLesson : handleAddLesson}>
+                        <input style={inputStyle} placeholder="Title" value={editingLesson ? editingLesson.title : newLesson.title} onChange={(e) => editingLesson ? setEditingLesson({...editingLesson, title: e.target.value}) : setNewLesson({...newLesson, title: e.target.value})} required />
+                        <textarea style={{...inputStyle, minHeight: '100px'}} placeholder="Content" value={editingLesson ? editingLesson.content : newLesson.content} onChange={(e) => editingLesson ? setEditingLesson({...editingLesson, content: e.target.value}) : setNewLesson({...newLesson, content: e.target.value})} required />
+                        <button type="submit" style={primaryBtn}>{editingLesson ? "Update Lesson" : "Save Lesson"}</button>
+                        {editingLesson && <button type="button" onClick={() => setEditingLesson(null)} style={{...primaryBtn, backgroundColor: '#6c757d', marginLeft: '10px'}}>Cancel</button>}
+                    </form>
                 </div>
+
+                <h3>Lessons</h3>
+                {selectedCourse.lessons.map((lesson) => (
+                    <div key={lesson.id} style={{padding: '15px', backgroundColor: 'white', borderLeft: '4px solid #34a853', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.05)'}}>
+                        <strong>{lesson.title}</strong>
+                        <div>
+                            <button style={{...editBtn, marginRight: '10px'}} onClick={() => setEditingLesson(lesson)}>Edit</button>
+                            <button style={deleteBtn} onClick={() => handleDeleteLesson(lesson.id)}>Delete</button>
+                        </div>
+                    </div>
+                ))}
             </div>
         );
     }
 
     return (
         <div style={containerStyle}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px' }}>
-                <h1>Instructor Dashboard</h1>
-                <button style={buttonStyle} onClick={() => setShowForm(!showForm)}>
-                    {showForm ? 'Cancel' : '+ Create New Course'}
-                </button>
+            <h1>Teacher Management Console</h1>
+            
+            <div style={formCardStyle}>
+                <h2>{editingCourse ? "Edit Course" : "Create New Course"}</h2>
+                <form onSubmit={editingCourse ? handleUpdateCourse : handleCreateCourse}>
+                    <input style={inputStyle} placeholder="Title" value={editingCourse ? editingCourse.title : newCourse.title} onChange={(e) => editingCourse ? setEditingCourse({...editingCourse, title: e.target.value}) : setNewCourse({...newCourse, title: e.target.value})} required />
+                    <textarea style={{...inputStyle, minHeight: '80px'}} placeholder="Description" value={editingCourse ? editingCourse.description : newCourse.description} onChange={(e) => editingCourse ? setEditingCourse({...editingCourse, description: e.target.value}) : setNewCourse({...newCourse, description: e.target.value})} required />
+                    <button type="submit" style={primaryBtn}>{editingCourse ? "Update Course" : "Create Course"}</button>
+                    {editingCourse && <button type="button" onClick={() => setEditingCourse(null)} style={{...primaryBtn, backgroundColor: '#6c757d', marginLeft: '10px'}}>Cancel</button>}
+                </form>
             </div>
 
-            {showForm && (
-                <div style={cardStyle}>
-                    <h3>Create New Course</h3>
-                    <form onSubmit={handleCreateCourse}>
-                        <input 
-                            placeholder="Course Title" 
-                            style={inputStyle} 
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            required 
-                        />
-                        <textarea 
-                            placeholder="Course Description" 
-                            style={{ ...inputStyle, height: '100px' }} 
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            required 
-                        />
-                        <button type="submit" style={buttonStyle}>Save Course</button>
-                    </form>
-                </div>
-            )}
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
+            <div style={cardGrid}>
                 {courses.map(course => (
                     <div key={course.id} style={cardStyle}>
-                        <h3 style={{ color: '#1a73e8', marginTop: 0 }}>{course.title}</h3>
-                        <p style={{ color: '#5f6368', minHeight: '60px' }}>{course.description}</p>
-                        <div style={{ marginTop: '20px' }}>
-                            <button style={buttonStyle} onClick={() => setSelectedCourse(course)}>
-                                View Lessons
-                            </button>
-                            <button 
-                                style={{ ...buttonStyle, backgroundColor: 'transparent', color: '#d93025', border: '1px solid #d93025' }}
-                                onClick={() => deleteCourse(course.id)}
-                            >
-                                Delete
-                            </button>
+                        <h3 style={{color: '#1a73e8'}}>{course.title}</h3>
+                        <p style={{flexGrow: 1}}>{course.description}</p>
+                        <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+                            <button style={{...primaryBtn, backgroundColor: '#34a853', flex: 1}} onClick={() => setSelectedCourse(course)}>Manage</button>
+                            <button style={{...editBtn, flex: 1}} onClick={() => setEditingCourse(course)}>Edit</button>
+                            <button style={{...deleteBtn, flex: 1}} onClick={() => handleDeleteCourse(course.id)}>Delete</button>
                         </div>
                     </div>
                 ))}
