@@ -14,10 +14,16 @@ class LessonSerializer(serializers.ModelSerializer):
 
 class CourseSerializer(serializers.ModelSerializer):
     lessons = LessonSerializer(many=True, read_only=True)
+    teacher_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
-        fields = ['id', 'title', 'description', 'lessons']
+        fields = ['id', 'title', 'description', 'teacher', 'teacher_name', 'lessons']
+
+    def get_teacher_name(self, obj):
+        if obj.teacher:
+            return obj.teacher.username
+        return "Unassigned"
 
 class EnrollmentSerializer(serializers.ModelSerializer):
     course_details = CourseSerializer(source='course', read_only=True)

@@ -1,95 +1,112 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
 import Login from './components/Login';
 import AdminDashboard from './components/AdminDashboard';
 import TeacherDashboard from './components/TeacherDashboard';
 import StudentDashboard from './components/StudentDashboard';
 
 const App = () => {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(localStorage.getItem('token'));
-    const [loading, setLoading] = useState(!!token);
+    const [auth, setAuth] = useState({
+        token: localStorage.getItem('token'),
+        role: localStorage.getItem('role') || '',
+        username: localStorage.getItem('username') || ''
+    });
 
-    useEffect(() => {
-        if (token) {
-            axios.get('http://127.0.0.1:8000/profile/', {
-                headers: { Authorization: `Token ${token}` }
-            })
-            .then(res => {
-                setUser(res.data);
-                setLoading(false);
-            })
-            .catch(() => {
-                handleLogout();
-                setLoading(false);
-            });
-        }
-    }, [token]);
+    const handleLogin = (token, role, username) => {
+        // These logs show up in your browser's F12 Console
+        console.log("--- Login Data Received ---");
+        console.log("Token:", token);
+        console.log("Role:", role);
+        console.log("Username:", username);
 
-    const handleLoginSuccess = (userData, userToken) => {
-        localStorage.setItem('token', userToken);
-        setToken(userToken);
-        setUser(userData);
+        const formattedRole = role ? role.toLowerCase() : '';
+        
+        localStorage.setItem('token', token);
+        localStorage.setItem('role', formattedRole);
+        localStorage.setItem('username', username);
+        
+        setAuth({ token, role: formattedRole, username });
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        setToken(null);
-        setUser(null);
+        localStorage.clear();
+        setAuth({ token: null, role: '', username: '' });
     };
 
-    if (loading) return <div style={{ padding: '20px' }}>Loading...</div>;
-
-    if (!user) {
-        return <Login onLoginSuccess={handleLoginSuccess} />;
-    }
-
-    const navStyle = {
-        padding: '15px 30px',
-        backgroundColor: '#ffffff',
+    const headerStyle = {
+        backgroundColor: '#1a1f36',
+        color: 'white',
+        padding: '15px 40px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-        fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+        fontFamily: 'Segoe UI, sans-serif',
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000
     };
 
-    const logoutButtonStyle = {
-        padding: '8px 16px',
-        backgroundColor: '#1a73e8',
+    const logoStyle = {
+        fontSize: '22px',
+        fontWeight: 'bold',
+        letterSpacing: '1px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px'
+    };
+
+    const logoutBtnStyle = {
+        backgroundColor: '#d93025',
         color: 'white',
         border: 'none',
+        padding: '8px 18px',
         borderRadius: '6px',
-        fontSize: '14px',
-        fontWeight: '600',
         cursor: 'pointer',
-        transition: 'background-color 0.2s'
+        fontWeight: '600',
+        fontSize: '14px'
+    };
+
+    if (!auth.token) {
+        return <Login onLogin={handleLogin} />;
+    }
+
+    const renderDashboard = () => {
+        const role = auth.role.toLowerCase();
+        if (role === 'admin') return <AdminDashboard token={auth.token} />;
+        if (role === 'teacher') return <TeacherDashboard token={auth.token} />;
+        if (role === 'student') return <StudentDashboard token={auth.token} user={{username: auth.username}} />;
+        
+        return (
+            <div style={{padding: '40px', textAlign: 'center'}}>
+                <h2>Role not recognized</h2>
+                <p>The system sees your role as: "<strong>{auth.role}</strong>"</p>
+                <button onClick={handleLogout} style={logoutBtnStyle}>Go Back to Login</button>
+            </div>
+        );
     };
 
     return (
-        <div className="app-container" style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
-            <nav style={navStyle}>
-                <span style={{ color: '#1a1f36', fontSize: '16px' }}>
-                    Welcome, <strong>{user.username}</strong>
-                </span>
-                <button 
-                    onClick={handleLogout} 
-                    style={logoutButtonStyle}
-                    onMouseOver={(e) => e.target.style.backgroundColor = '#1557b0'}
-                    onMouseOut={(e) => e.target.style.backgroundColor = '#1a73e8'}
-                >
-                    Logout
-                </button>
-            </nav>
+        <div style={{ backgroundColor: '#f8f9fc', minHeight: '100vh' }}>
+            <header style={headerStyle}>
+                <div style={logoStyle}>
+                    <div style={{ 
+                        width: '32px', height: '32px', backgroundColor: '#1a73e8', borderRadius: '8px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px'
+                    }}>C</div>
+                    <span>CYAN-PRO LEARNING</span>
+                </div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <div style={{ textAlign: 'right', borderRight: '1px solid #3c4257', paddingRight: '20px' }}>
+                        <div style={{ fontSize: '14px', fontWeight: 'bold' }}>{auth.username}</div>
+                        <div style={{ fontSize: '11px', color: '#9ea3ac', textTransform: 'uppercase' }}>{auth.role}</div>
+                    </div>
+                    <button onClick={handleLogout} style={logoutBtnStyle}>Logout</button>
+                </div>
+            </header>
 
-            <main>
-                {user.is_superuser ? (
-                    <AdminDashboard token={token} />
-                ) : user.is_staff ? (
-                    <TeacherDashboard token={token} user={user} />
-                ) : (
-                    <StudentDashboard token={token} user={user} />
-                )}
+            <main style={{ padding: '20px' }}>
+                {renderDashboard()}
             </main>
         </div>
     );

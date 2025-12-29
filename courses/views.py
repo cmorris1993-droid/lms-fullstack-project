@@ -3,7 +3,12 @@ from django.contrib.auth.models import User
 from .models import Course, Lesson, Enrollment
 from .serializers import CourseSerializer, LessonSerializer, EnrollmentSerializer, UserSerializer
 
-class UserList(generics.ListAPIView):
+class UserList(generics.ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAdminUser]
@@ -16,9 +21,14 @@ class UserProfileView(generics.RetrieveAPIView):
         return self.request.user
 
 class CourseViewSet(viewsets.ModelViewSet):
-    queryset = Course.objects.all()
     serializer_class = CourseSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Course.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(teacher=self.request.user)
 
 class LessonViewSet(viewsets.ModelViewSet):
     queryset = Lesson.objects.all()
