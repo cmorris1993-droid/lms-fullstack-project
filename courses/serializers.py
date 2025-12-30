@@ -3,9 +3,18 @@ from django.contrib.auth.models import User
 from .models import Course, Lesson, Enrollment
 
 class UserSerializer(serializers.ModelSerializer):
+    role = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'is_staff', 'is_superuser']
+        fields = ['id', 'username', 'email', 'is_staff', 'is_superuser', 'role']
+
+    def get_role(self, obj):
+        if obj.is_superuser:
+            return "Admin"
+        if obj.courses.exists():
+            return "Teacher"
+        return "Student"
 
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
