@@ -156,7 +156,6 @@ const AdminDashboard = ({ token }) => {
                 </table>
             </div>
             
-            {/* Keeping Course section for context, but styles apply here too */}
             <div>
                 <h2 style={{ fontSize: '20px', marginBottom: '16px', color: '#1a1f36' }}>Course Overview</h2>
                 <table style={tableStyle}>

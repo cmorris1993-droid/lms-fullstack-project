@@ -12,7 +12,6 @@ const App = () => {
     });
 
     const handleLogin = (token, role, username) => {
-        // These logs show up in your browser's F12 Console
         console.log("--- Login Data Received ---");
         console.log("Token:", token);
         console.log("Role:", role);

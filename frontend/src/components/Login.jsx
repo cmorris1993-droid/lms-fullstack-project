@@ -88,16 +88,28 @@ const Login = ({ onLogin }) => {
             <div style={cardStyle}>
                 <h2 style={{ textAlign: 'center', marginBottom: '30px', fontFamily: 'Segoe UI' }}>LMS Portal Login</h2>
                 <form onSubmit={handleSubmit}>
-                    <label style={{fontFamily: 'Segoe UI', fontSize: '14px', fontWeight: '600'}}>Username</label>
+                    <label 
+                        htmlFor="username-field"
+                        style={{fontFamily: 'Segoe UI', fontSize: '14px', fontWeight: '600'}}
+                    >
+                        Username
+                    </label>
                     <input 
+                        id="username-field"
                         type="text" 
                         value={username} 
                         onChange={(e) => setUsername(e.target.value)} 
                         style={inputStyle}
                         required 
                     />
-                    <label style={{fontFamily: 'Segoe UI', fontSize: '14px', fontWeight: '600'}}>Password</label>
+                    <label 
+                        htmlFor="password-field"
+                        style={{fontFamily: 'Segoe UI', fontSize: '14px', fontWeight: '600'}}
+                    >
+                        Password
+                    </label>
                     <input 
+                        id="password-field"
                         type="password" 
                         value={password} 
                         onChange={(e) => setPassword(e.target.value)} 
