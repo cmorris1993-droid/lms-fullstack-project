@@ -26,6 +26,10 @@ This application provides a platform for educational management. It allows admin
 ## Design & Wireframes
 The user flows and interface designs were planned in FigJam. 
 [View Interactive Wireframes on Figma](https://embed.figma.com/design/tbZubJ4DQtu86sFxpdTEYk/LMS-Wireframe?embed-host=share)
+* **Brand Palette**:
+    * **Primary Blue**: `#1A73E8` (Actions & Branding)
+    * **Deep Navy**: `#1A1F36` (Headings & Navigation)
+    * **Success Green**: `#34A853` (Affirmative actions)
 
 ## ⚙️ Setup and Installation
 
