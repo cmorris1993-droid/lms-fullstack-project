@@ -23,6 +23,10 @@ This application provides a platform for educational management. It allows admin
 * **Backend Testing:** Django TestCase (built-in)
 * **Frontend Testing:** Vitest, React Testing Library, and JSDOM
 
+## Design & Wireframes
+The user flows and interface designs were planned in FigJam. 
+[View Interactive Wireframes on Figma](https://embed.figma.com/design/tbZubJ4DQtu86sFxpdTEYk/LMS-Wireframe?embed-host=share)
+
 ## ⚙️ Setup and Installation
 
 ### 1. Backend (Django)
@@ -97,3 +101,18 @@ This project was built following industry-standard patterns and documentation:
 ### 3. Routing & Logic Patterns
 * **[DRF Routers](https://www.django-rest-framework.org/api-guide/routers/)**: Explains the use of `DefaultRouter()` in `urls.py` to automatically create all the "List", "Create", and "Delete" addresses.
 * **[Django Permissions](https://www.django-rest-framework.org/api-guide/permissions/)**: Explains how the `IsAdminUser` and `IsAuthenticated` flags keep student data private.
+
+### 4. Automated Testing & Reliability
+* **[React Testing Library Docs](https://testing-library.com/docs/react-testing-library/intro/)**: The primary framework used to validate that role-based dashboards (Student, Teacher, Admin) render correctly and securely.
+* **[Common Testing Mistakes](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library)**: A guide that helped ensure the automated tests were focused on user behavior rather than code implementation.
+
+### 5. Frontend Architecture & Design
+* **[React Conditional Rendering](https://react.dev/learn/conditional-rendering)**: Deep dive into the logic used to toggle UI views dynamically, such as displaying different buttons based on whether a user is a Teacher or a Student.
+* **[Refactoring UI](https://www.refactoringui.com/)**: A resource for establishing visual hierarchy using our specific brand colors, such as Deep Navy (`#1A1F36`) for headers and Success Green (`#34A853`) for course actions.
+* **[Figma Design Systems](https://help.figma.com/hc/en-us/articles/360040449773-Best-practices-for-design-systems)**: The methodology used to translate FigJam wireframes into consistent UI components across all management dashboards.
+
+### 6. Modern Development & AI Assistance
+This project integrated AI-assisted development workflows to accelerate troubleshooting and ensure architectural consistency:
+* **Gemini & LLMs**: Used as a thought partner for interpreting complex Django Rest Framework error logs and mapping out Role-Based Access Control (RBAC) logic.
+* **VS Code AI Tools**: Leveraged for rapid debugging and identifying syntax errors within React components without compromising the project's clean-code standards.
+* **Troubleshooting & Refinement**: AI was instrumental in identifying specific Hex codes from browser inspections to ensure the frontend perfectly matched the intended design system.
