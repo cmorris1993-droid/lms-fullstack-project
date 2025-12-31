@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import API_URL from '../config';
 
 const LessonViewer = ({ course, onBack }) => {
     const [activeLesson, setActiveLesson] = useState(null);

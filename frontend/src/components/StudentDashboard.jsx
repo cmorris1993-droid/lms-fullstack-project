@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import LessonViewer from './LessonViewer';
+import API_URL from '../config';
 
 const StudentDashboard = ({ token, user }) => {
     const [allCourses, setAllCourses] = useState([]);
@@ -16,12 +17,14 @@ const StudentDashboard = ({ token, user }) => {
 
     const fetchData = async () => {
         try {
-            const coursesRes = await axios.get('http://127.0.0.1:8000/courses/', {
+            // Updated to use API_URL
+            const coursesRes = await axios.get(`${API_URL}/courses/`, {
                 headers: { Authorization: `Token ${token}` }
             });
             setAllCourses(Array.isArray(coursesRes.data) ? coursesRes.data : []);
 
-            const enrollmentsRes = await axios.get('http://127.0.0.1:8000/enrolled-courses/', {
+            // Updated to use API_URL
+            const enrollmentsRes = await axios.get(`${API_URL}/enrolled-courses/`, {
                 headers: { Authorization: `Token ${token}` }
             });
             setMyEnrollments(Array.isArray(enrollmentsRes.data) ? enrollmentsRes.data : []);
@@ -34,7 +37,8 @@ const StudentDashboard = ({ token, user }) => {
 
     const handleEnroll = async (courseId) => {
         try {
-            await axios.post('http://127.0.0.1:8000/enrollments/', {
+            // Updated to use API_URL
+            await axios.post(`${API_URL}/enrollments/`, {
                 course: courseId
             }, {
                 headers: { Authorization: `Token ${token}` }

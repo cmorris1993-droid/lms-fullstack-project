@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import API_URL from '../config';
 
 const AdminDashboard = ({ token }) => {
     const [users, setUsers] = useState([]);
@@ -15,10 +16,10 @@ const AdminDashboard = ({ token }) => {
     const fetchAdminData = async () => {
         try {
             const [userRes, courseRes] = await Promise.all([
-                axios.get('http://127.0.0.1:8000/users/', {
+                axios.get(`${API_URL}/users/`, {
                     headers: { Authorization: `Token ${token}` }
                 }),
-                axios.get('http://127.0.0.1:8000/courses/', {
+                axios.get(`${API_URL}/courses/`, {
                     headers: { Authorization: `Token ${token}` }
                 })
             ]);
@@ -34,7 +35,7 @@ const AdminDashboard = ({ token }) => {
     const deleteUser = async (userId) => {
         if (!window.confirm("Are you sure?")) return;
         try {
-            await axios.delete(`http://127.0.0.1:8000/users/${userId}/`, {
+            await axios.delete(`${API_URL}/users/${userId}/`, {
                 headers: { Authorization: `Token ${token}` }
             });
             setUsers(users.filter(u => u.id !== userId));
@@ -44,7 +45,7 @@ const AdminDashboard = ({ token }) => {
     const deleteCourse = async (courseId) => {
         if (!window.confirm("Are you sure?")) return;
         try {
-            await axios.delete(`http://127.0.0.1:8000/courses/${courseId}/`, {
+            await axios.delete(`${API_URL}/courses/${courseId}/`, {
                 headers: { Authorization: `Token ${token}` }
             });
             setCourses(courses.filter(c => c.id !== courseId));
@@ -69,7 +70,7 @@ const AdminDashboard = ({ token }) => {
                 is_staff: editFormData.role === 'Admin' || editFormData.role === 'Teacher'
             };
 
-            const res = await axios.patch(`http://127.0.0.1:8000/users/${userId}/`, payload, {
+            const res = await axios.patch(`${API_URL}/users/${userId}/`, payload, {
                 headers: { Authorization: `Token ${token}` }
             });
             setUsers(users.map(u => u.id === userId ? res.data : u));

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import API_URL from '../config';
 
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
@@ -13,7 +14,7 @@ const Login = ({ onLogin }) => {
         try {
             const response = await axios({
                 method: 'post',
-                url: 'http://127.0.0.1:8000/api-token-auth/',
+                url: `${API_URL}/api-token-auth/`,
                 data: {
                     username: username,
                     password: password
@@ -23,7 +24,7 @@ const Login = ({ onLogin }) => {
 
             const token = response.data.token;
             
-            const profileResponse = await axios.get('http://127.0.0.1:8000/profile/', {
+            const profileResponse = await axios.get(`${API_URL}/profile/`, {
                 headers: { Authorization: `Token ${token}` }
             });
 

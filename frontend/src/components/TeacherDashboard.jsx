@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import API_URL from '../config';
 
 const TeacherDashboard = ({ token }) => {
     const [courses, setCourses] = useState([]);
@@ -20,7 +21,7 @@ const TeacherDashboard = ({ token }) => {
 
     const fetchCourses = async () => {
         try {
-            const res = await axios.get('http://127.0.0.1:8000/courses/', {
+            const res = await axios.get(`${API_URL}/courses/`, {
                 headers: { Authorization: `Token ${token}` }
             });
             setCourses(res.data);
@@ -38,7 +39,7 @@ const TeacherDashboard = ({ token }) => {
     const handleCreateCourse = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://127.0.0.1:8000/courses/', newCourse, {
+            await axios.post(`${API_URL}/courses/`, newCourse, {
                 headers: { Authorization: `Token ${token}` }
             });
             setNewCourse({ title: '', description: '' });
@@ -49,7 +50,7 @@ const TeacherDashboard = ({ token }) => {
     const deleteCourse = async (id) => {
         if (!window.confirm("Delete course?")) return;
         try {
-            await axios.delete(`http://127.0.0.1:8000/courses/${id}/`, {
+            await axios.delete(`${API_URL}/courses/${id}/`, {
                 headers: { Authorization: `Token ${token}` }
             });
             fetchCourses();
@@ -58,7 +59,7 @@ const TeacherDashboard = ({ token }) => {
 
     const saveEditCourse = async (id) => {
         try {
-            await axios.patch(`http://127.0.0.1:8000/courses/${id}/`, editCourseData, {
+            await axios.patch(`${API_URL}/courses/${id}/`, editCourseData, {
                 headers: { Authorization: `Token ${token}` }
             });
             setEditingCourse(null);
@@ -69,7 +70,7 @@ const TeacherDashboard = ({ token }) => {
     const handleCreateLesson = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://127.0.0.1:8000/lessons/', { ...newLesson, course: selectedCourse.id }, {
+            await axios.post(`${API_URL}/lessons/`, { ...newLesson, course: selectedCourse.id }, {
                 headers: { Authorization: `Token ${token}` }
             });
             setNewLesson({ title: '', content: '' });
@@ -79,7 +80,7 @@ const TeacherDashboard = ({ token }) => {
 
     const saveEditLesson = async (lessonId) => {
         try {
-            await axios.patch(`http://127.0.0.1:8000/lessons/${lessonId}/`, editLessonData, {
+            await axios.patch(`${API_URL}/lessons/${lessonId}/`, editLessonData, {
                 headers: { Authorization: `Token ${token}` }
             });
             setEditingLesson(null);
@@ -90,7 +91,7 @@ const TeacherDashboard = ({ token }) => {
     const deleteLesson = async (id) => {
         if (!window.confirm("Delete lesson?")) return;
         try {
-            await axios.delete(`http://127.0.0.1:8000/lessons/${id}/`, {
+            await axios.delete(`${API_URL}/lessons/${id}/`, {
                 headers: { Authorization: `Token ${token}` }
             });
             fetchCourses();
