@@ -31,6 +31,19 @@ The user flows and interface designs were planned in FigJam.
     * **Deep Navy**: `#1A1F36` (Headings & Navigation)
     * **Success Green**: `#34A853` (Affirmative actions)
 
+## 🚀 Live Demo
+
+- **Frontend Application**: [https://playful-kleicha-656982.netlify.app/](https://playful-kleicha-656982.netlify.app/)
+- **Backend API (Admin)**: [https://lms-backend-1sbb.onrender.com/admin/](https://lms-backend-1sbb.onrender.com/admin/)
+
+> **Note**: This project is hosted on Render's free tier. If the site is slow to respond initially, the backend may be "waking up" from sleep mode. Please allow 30-60 seconds for the first request.
+
+### 🔑 Credentials for Testing
+The backend is configured to automatically regenerate a test account on every deploy:
+- **Username**: `cyan`
+- **Password**: `Password1234!`
+- **Role**: `Admin`
+
 ## ⚙️ Setup and Installation
 
 ### 1. Backend (Django)
