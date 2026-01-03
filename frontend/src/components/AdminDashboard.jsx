@@ -8,6 +8,14 @@ const AdminDashboard = ({ token }) => {
     const [loading, setLoading] = useState(true);
     const [editingUser, setEditingUser] = useState(null);
     const [editFormData, setEditFormData] = useState({ username: '', email: '', role: 'Student' });
+    
+    const [showCreateForm, setShowCreateForm] = useState(false);
+    const [newUserFormData, setNewUserFormData] = useState({ 
+        username: '', 
+        password: '', 
+        email: '', 
+        role: 'Student' 
+    });
 
     useEffect(() => {
         fetchAdminData();
@@ -29,6 +37,30 @@ const AdminDashboard = ({ token }) => {
         } catch (err) {
             console.error("Admin fetch error:", err);
             setLoading(false);
+        }
+    };
+
+    const handleCreateUser = async (e) => {
+        e.preventDefault();
+        try {
+            const payload = {
+                username: newUserFormData.username,
+                password: newUserFormData.password,
+                email: newUserFormData.email,
+                is_superuser: newUserFormData.role === 'Admin',
+                is_staff: newUserFormData.role === 'Admin' || newUserFormData.role === 'Teacher'
+            };
+
+            const res = await axios.post(`${API_URL}/users/`, payload, {
+                headers: { Authorization: `Token ${token}` }
+            });
+            
+            setUsers([...users, res.data]);
+            setShowCreateForm(false);
+            setNewUserFormData({ username: '', password: '', email: '', role: 'Student' });
+        } catch (err) {
+            console.error("Creation error:", err);
+            alert("Failed to create user. Ensure the username is unique.");
         }
     };
 
@@ -93,7 +125,6 @@ const AdminDashboard = ({ token }) => {
         fontSize: '14px',
         width: '100%',
         outline: 'none',
-        transition: 'border-color 0.2s',
         boxSizing: 'border-box'
     };
 
@@ -104,6 +135,19 @@ const AdminDashboard = ({ token }) => {
     const btnSave = { ...btnBase, backgroundColor: '#34a853', color: 'white' };
     const btnCancel = { ...btnBase, backgroundColor: '#f1f3f4', color: '#5f6368' };
     const btnDelete = { ...btnBase, backgroundColor: '#fce8e6', color: '#d93025', marginRight: '0' };
+    const btnCreate = { ...btnBase, backgroundColor: '#1a73e8', color: 'white', padding: '10px 20px', marginBottom: '20px' };
+
+    const formContainerStyle = {
+        backgroundColor: 'white',
+        padding: '24px',
+        borderRadius: '12px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+        marginBottom: '32px',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '16px',
+        alignItems: 'end'
+    };
 
     const getRoleStyle = (role) => {
         if (role === 'Admin') return { backgroundColor: '#feecf0', color: '#cc0f35' };
@@ -119,7 +163,53 @@ const AdminDashboard = ({ token }) => {
             <p style={{ color: '#5f6368', marginBottom: '32px' }}>Manage user permissions and course content</p>
 
             <div style={{ marginBottom: '48px' }}>
-                <h2 style={{ fontSize: '20px', marginBottom: '16px', color: '#1a1f36' }}>User Management</h2>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                    <h2 style={{ fontSize: '20px', color: '#1a1f36', margin: 0 }}>User Management</h2>
+                    <button 
+                        onClick={() => setShowCreateForm(!showCreateForm)} 
+                        style={btnCreate}
+                    >
+                        {showCreateForm ? 'Cancel' : '+ Add New User'}
+                    </button>
+                </div>
+
+                {showCreateForm && (
+                    <form onSubmit={handleCreateUser} style={formContainerStyle}>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px', color: '#5f6368' }}>USERNAME</label>
+                            <input 
+                                required
+                                style={inputStyle}
+                                value={newUserFormData.username}
+                                onChange={(e) => setNewUserFormData({...newUserFormData, username: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px', color: '#5f6368' }}>PASSWORD</label>
+                            <input 
+                                required
+                                type="password"
+                                style={inputStyle}
+                                value={newUserFormData.password}
+                                onChange={(e) => setNewUserFormData({...newUserFormData, password: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px', color: '#5f6368' }}>ROLE</label>
+                            <select 
+                                style={selectStyle}
+                                value={newUserFormData.role}
+                                onChange={(e) => setNewUserFormData({...newUserFormData, role: e.target.value})}
+                            >
+                                <option value="Student">Student</option>
+                                <option value="Teacher">Teacher</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                        </div>
+                        <button type="submit" style={{ ...btnSave, height: '38px', width: '100%' }}>Create User</button>
+                    </form>
+                )}
+
                 <table style={tableStyle}>
                     <thead>
                         <tr>
@@ -131,7 +221,7 @@ const AdminDashboard = ({ token }) => {
                     </thead>
                     <tbody>
                         {users.map(u => (
-                            <tr key={u.id} style={{ transition: 'background 0.2s' }}>
+                            <tr key={u.id}>
                                 <td style={{...tdStyle, color: '#9ea3ac'}}>#{u.id}</td>
                                 <td style={tdStyle}>
                                     {editingUser === u.id ? (
