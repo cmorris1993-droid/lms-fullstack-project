@@ -7,14 +7,25 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'is_staff', 'is_superuser', 'role']
+        fields = ['id', 'username', 'email', 'password', 'is_staff', 'is_superuser', 'role']
+        extra_kwargs = {
+            'password': {'write_only': True, 'required': False}
+        }
 
     def get_role(self, obj):
         if obj.is_superuser:
             return "Admin"
-        if obj.courses.exists():
+        if obj.is_staff:
             return "Teacher"
         return "Student"
+
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        user = User(**validated_data)
+        if password:
+            user.set_password(password)
+        user.save()
+        return user
 
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
